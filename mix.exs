@@ -19,7 +19,9 @@ defmodule Decompilerl.Mixfile do
 
   def application, do: [applications: []]
 
-  defp deps, do: []
+  defp deps do
+    [{:ex_doc, "~> 0.10", only: :dev}]
+  end
 
   defp package do
     [maintainers: ["Adam Rutkowski"],
