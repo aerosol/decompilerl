@@ -7,6 +7,8 @@ defmodule Decompilerl.Mixfile do
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: "Decompile Elixir modules to Erlang abstract code",
+     package: package,
      escript: escript,
      deps: deps]
   end
@@ -18,4 +20,10 @@ defmodule Decompilerl.Mixfile do
   def application, do: [applications: []]
 
   defp deps, do: []
+
+  defp package do
+    [maintainers: ["Adam Rutkowski"],
+     licenses: ["WTFPL"],
+     links: %{"GitHub" => "https://github.com/aerosol/decompilerl"}]
+  end
 end
