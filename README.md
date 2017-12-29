@@ -59,6 +59,41 @@ new() ->
 There we go! `struct` is an Erlang map with a special key `__struct__ => ?MODULE`
 that allows pattern matching further down the line. Noice!
 
+## Summary View
+
+Sometimes you don't want to fish through all the source code so there is now a summary view.
+
+This can be called as so:
+
+```elixir
+Decompilerl.summarise('_build/dev/lib/myapp/ebin/Elixir.MyApp.AuthController.beam')
+```
+
+It returns a summary of the beam file:
+```
+File         : web/controllers/auth_controller.ex
+Module       : Elixir.MyApp.AuthController
+Behaviours   : Elixir.Plug
+Exported Fns : __info__/1
+               action/2
+               call/2
+               callback/2
+               fake/2
+               index/2
+               init/1
+Private Fns  : action (overridable 2)/2
+               authorize_url!/1
+               call/2
+               callback/2
+               fake/2
+               get_token!/2
+               get_user!/2
+               index/2
+               init/1
+               maybe_create/5
+               phoenix_controller_pipeline/2
+```
+
 ## Command-line interface
 
 You can build `Decompilerl` as a standalone executable (escript).
@@ -73,13 +108,15 @@ $ ./decompilerl
 
 Decompilerl
 
-usage: decompierl <beam_file> [-o <erl_file> | --output=<erl_file>]
+usage: decompierl <beam_file> [-o <erl_file> | --output=<erl_file> | -s | --summary]
 ```
 
 ## Usage
 
 By default, `Decompilerl.decompile` spits the Erlang abstract code to stdout.
 When provided with a second (optional) argument, it'll dump it to a file.
+
+adding the option `-s` or `--summary` produces the summary and not the source code
 
 ```
 $ iex -S mix
