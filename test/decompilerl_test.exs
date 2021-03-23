@@ -9,7 +9,7 @@ defmodule DecompilerlTest do
   end
 
   test "output to file" do
-    File.rm_rf!("tmp")
+    File.rm(@outfile)
     File.mkdir_p!("tmp")
     :ok = Decompilerl.decompile(Decompilerl, device: @outfile)
     assert File.exists?(@outfile)
