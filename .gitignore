@@ -3,4 +3,5 @@
 /deps
 erl_crash.dump
 *.ez
-decompilerl_test.erl
+/tmp
+/decompilerl

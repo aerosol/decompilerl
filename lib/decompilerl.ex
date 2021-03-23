@@ -1,35 +1,70 @@
 defmodule Decompilerl do
+  def decompile(module_or_path, opts \\ []) do
+    device = Keyword.get(opts, :device, :stdio)
+    skip_info? = Keyword.get(opts, :skip_info, false)
 
-  def decompile(module, device \\ :stdio) do
-    obtain_beam(module)
-    |> do_decompile
+    module_or_path
+    |> get_beam()
+    |> Enum.map(&do_decompile(&1, skip_info?))
     |> write_to(device)
   end
 
-  defp obtain_beam(module) when is_atom(module) do
-    {^module, beam, _file} = :code.get_object_code(module)
-    beam
+  defp get_beam(module) when is_atom(module) do
+    {^module, bytecode, _file} = :code.get_object_code(module)
+    [bytecode]
   end
 
-  defp obtain_beam(module) when is_binary(module) do
-    String.to_char_list(module)
+  defp get_beam(path) when is_binary(path) do
+    case Path.extname(path) do
+      ".beam" ->
+        [String.to_charlist(path)]
+
+      ".ex" ->
+        code = File.read!(path)
+
+        for {_module, beam} <- Code.compile_string(code) do
+          beam
+        end
+    end
   end
 
-  defp do_decompile(beam_code) do
-    {:ok, {_, [abstract_code: {_, ac}]}} =
-      :beam_lib.chunks(beam_code, [:abstract_code])
-
+  defp do_decompile(bytecode_or_path, skip_info?) do
+    {:ok, {_, [abstract_code: {_, ac}]}} = :beam_lib.chunks(bytecode_or_path, [:abstract_code])
+    ac = if skip_info?, do: skip_info(ac), else: ac
     :erl_prettypr.format(:erl_syntax.form_list(ac))
   end
 
-  defp write_to(code, :stdio) do
-    IO.puts code
+  defp skip_info(ac) do
+    ac
+    |> Enum.reduce([], fn item, acc ->
+      cond do
+        match?({:attribute, _, :export, _}, item) ->
+          exports = elem(item, 3)
+          exports = exports -- [__info__: 1]
+          item = put_elem(item, 3, exports)
+          [item | acc]
+
+        match?({:attribute, _, :spec, {{:__info__, 1}, _}}, item) or
+            match?({:function, _, :__info__, 1, _}, item) ->
+          acc
+
+        true ->
+          [item | acc]
+      end
+    end)
+    |> Enum.reverse()
   end
-  defp write_to(code, file_name) when is_binary(file_name) do
+
+  defp write_to(code, device) when is_atom(device) or is_pid(device) do
+    IO.puts(device, code)
+  end
+
+  defp write_to(code, filename) when is_binary(filename) do
     {:ok, result} =
-      File.open(file_name, [:write], fn(file) ->
+      File.open(filename, [:write], fn file ->
         IO.binwrite(file, code)
       end)
+
     result
   end
 end
