@@ -73,7 +73,7 @@ $ ./decompilerl
 
 Decompilerl
 
-usage: decompierl <beam_file> [-o <erl_file> | --output=<erl_file>]
+usage: decompierl <file> [-o <erl_file> | --output=<erl_file>]
 ```
 
 ## Usage
