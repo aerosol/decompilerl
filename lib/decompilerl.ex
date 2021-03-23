@@ -37,18 +37,19 @@ defmodule Decompilerl do
   defp skip_info(ac) do
     ac
     |> Enum.reduce([], fn item, acc ->
-      cond do
-        match?({:attribute, _, :export, _}, item) ->
-          exports = elem(item, 3)
+      case item do
+        {:attribute, _, :export, exports} ->
           exports = exports -- [__info__: 1]
           item = put_elem(item, 3, exports)
           [item | acc]
 
-        match?({:attribute, _, :spec, {{:__info__, 1}, _}}, item) or
-            match?({:function, _, :__info__, 1, _}, item) ->
+        {:attribute, _, :spec, {{:__info__, 1}, _}} ->
           acc
 
-        true ->
+        {:function, _, :__info__, 1, _} ->
+          acc
+
+        _ ->
           [item | acc]
       end
     end)
