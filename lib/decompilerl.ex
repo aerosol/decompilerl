@@ -1,9 +1,9 @@
 defmodule Decompilerl do
-  def decompile(module_or_path, opts \\ []) do
+  def decompile(module_or_path_or_tuple, opts \\ []) do
     device = Keyword.get(opts, :device, :stdio)
     skip_info? = Keyword.get(opts, :skip_info, false)
 
-    module_or_path
+    module_or_path_or_tuple
     |> get_beam()
     |> Enum.map(&do_decompile(&1, skip_info?))
     |> write_to(device)
@@ -26,6 +26,10 @@ defmodule Decompilerl do
           beam
         end
     end
+  end
+
+  defp get_beam({:module, _module, beam, _result}) do
+    [beam]
   end
 
   defp do_decompile(bytecode_or_path, skip_info?) do
